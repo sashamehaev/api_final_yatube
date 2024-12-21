@@ -1,10 +1,15 @@
 from rest_framework import viewsets
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
-from .serializers import CommentSerializer, GroupSerializer, PostSerializer
-from posts.models import Group, Post
+from .serializers import (CommentSerializer,
+                          GroupSerializer,
+                          PostSerializer,
+                          FollowSerializer)
+from posts.models import Group, Post, Follow
 
+User = get_user_model()
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -24,7 +29,7 @@ class PostViewSet(viewsets.ModelViewSet):
         super().perform_destroy(instance)
 
 
-class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
@@ -51,3 +56,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         if instance.author != self.request.user:
             raise PermissionDenied('Удалять чужой комментарий запрещено!')
         super().perform_destroy(instance)
+
+
+class FollowViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+
+    def get_queryset(self):
+        return self.request.user.follower.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
