@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth import get_user_model
 
-from posts.models import Post, Group, Comment, Follow
+from posts.models import Follow, Comment, Group, Post
 
 User = get_user_model()
 
